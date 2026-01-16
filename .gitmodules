@@ -1,0 +1,6 @@
+[submodule "reshade"]
+	path = reshade
+	url = https://github.com/crosire/reshade.git
+[submodule "DLSS"]
+	path = DLSS
+	url = https://github.com/NVIDIA/DLSS.git
