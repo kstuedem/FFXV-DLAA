@@ -63,7 +63,7 @@
       <AdditionalDependencies>DLSS\lib\Windows_x86_64\x64\nvsdk_ngx_d_dbg.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>fxc /T cs_5_0 /E main /O3 /Fo intermediate/PrepareMotionVectors.cso PrepareMotionVectors.cs_5_0.hlsl &amp;&amp; embedfile.exe intermediate/PrepareMotionVectors.cso intermediate/PrepareMotionVectors.h &amp;&amp; fxc /T ps_5_0 /E main /O3 /Fo intermediate/0x0D1CD1AA.cso 0x0D1CD1AA.ps_5_0.hlsl &amp;&amp; embedfile.exe intermediate/0x0D1CD1AA.cso intermediate/0x0D1CD1AA.h</Command>
+      <Command>fxc /T cs_5_0 /E main /O3 /Fo intermediate/PrepareMotionVectors.cso PrepareMotionVectors.cs_5_0.hlsl &amp;&amp; python.exe embedfile.py intermediate/PrepareMotionVectors.cso intermediate/PrepareMotionVectors.h &amp;&amp; fxc /T ps_5_0 /E main /O3 /Fo intermediate/0x0D1CD1AA.cso 0x0D1CD1AA.ps_5_0.hlsl &amp;&amp; python.exe embedfile.py intermediate/0x0D1CD1AA.cso intermediate/0x0D1CD1AA.h</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,7 +86,7 @@
       <AdditionalDependencies>DLSS\lib\Windows_x86_64\x64\nvsdk_ngx_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>fxc /T cs_5_0 /E main /O3 /Fo intermediate/PrepareMotionVectors.cso PrepareMotionVectors.cs_5_0.hlsl &amp;&amp; embedfile.exe intermediate/PrepareMotionVectors.cso intermediate/PrepareMotionVectors.h &amp;&amp; fxc /T ps_5_0 /E main /O3 /Fo intermediate/0x0D1CD1AA.cso 0x0D1CD1AA.ps_5_0.hlsl &amp;&amp; embedfile.exe intermediate/0x0D1CD1AA.cso intermediate/0x0D1CD1AA.h</Command>
+      <Command>fxc /T cs_5_0 /E main /O3 /Fo intermediate/PrepareMotionVectors.cso PrepareMotionVectors.cs_5_0.hlsl &amp;&amp; python.exe embedfile.py intermediate/PrepareMotionVectors.cso intermediate/PrepareMotionVectors.h &amp;&amp; fxc /T ps_5_0 /E main /O3 /Fo intermediate/0x0D1CD1AA.cso 0x0D1CD1AA.ps_5_0.hlsl &amp;&amp; python.exe embedfile.py intermediate/0x0D1CD1AA.cso intermediate/0x0D1CD1AA.h</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
