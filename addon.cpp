@@ -37,6 +37,7 @@ bool invokedThisFrame = false;
 bool needReset = false;
 bool needReinitialize = false;
 NVSDK_NGX_DLSS_Hint_Render_Preset preset = NVSDK_NGX_DLSS_Hint_Render_Preset_K;
+bool autoExposure = false;
 float sharpenMultiplier = 1.0f;
 
 void ReleaseDLSS() {
@@ -70,17 +71,45 @@ static void drawSettings(reshade::api::effect_runtime*)
     }
 
     static const NVSDK_NGX_DLSS_Hint_Render_Preset presets[] = {
+        NVSDK_NGX_DLSS_Hint_Render_Preset_F,
+        NVSDK_NGX_DLSS_Hint_Render_Preset_J,
         NVSDK_NGX_DLSS_Hint_Render_Preset_K,
+        NVSDK_NGX_DLSS_Hint_Render_Preset_L,
         NVSDK_NGX_DLSS_Hint_Render_Preset_M
     };
     static const char* presetNames[] = {
+        "Preset F(DLSS 3.0)",
+        "Preset J(DLSS 4.0 old)",
         "Preset K(DLSS 4.0)",
+        "Preset L(DLSS 4.5 - very slow)",
         "Preset M(DLSS 4.5)"
     };
-    const char* combo_preview_value = preset == NVSDK_NGX_DLSS_Hint_Render_Preset_K ? presetNames[0] : presetNames[1];
+    const char* combo_preview_value;
+    switch (preset)
+    {
+    case NVSDK_NGX_DLSS_Hint_Render_Preset_F:
+        combo_preview_value = presetNames[0];
+        break;
+    case NVSDK_NGX_DLSS_Hint_Render_Preset_J:
+        combo_preview_value = presetNames[1];
+        break;
+    case NVSDK_NGX_DLSS_Hint_Render_Preset_K:
+        combo_preview_value = presetNames[2];
+        break;
+    case NVSDK_NGX_DLSS_Hint_Render_Preset_L:
+        combo_preview_value = presetNames[3];
+        break;
+    case NVSDK_NGX_DLSS_Hint_Render_Preset_M:
+        combo_preview_value = presetNames[4];
+        break;
+    default:
+        preset = NVSDK_NGX_DLSS_Hint_Render_Preset_K;
+        combo_preview_value = presetNames[2];
+        break;
+    }
     if (ImGui::BeginCombo("Preset", combo_preview_value, 0))
     {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 5; i++) {
             bool isSelected = preset == presets[i];
             if (ImGui::Selectable(presetNames[i], isSelected)) {
                 preset = presets[i];
@@ -93,6 +122,11 @@ static void drawSettings(reshade::api::effect_runtime*)
         }
         ImGui::EndCombo();
     }
+    if (ImGui::Checkbox("Enable Auto-exposure", &autoExposure))
+    {
+        reshade::set_config_value(nullptr, "DLAA", "AutoExposure", autoExposure);
+        needReinitialize = true;
+    }
 }
 
 void OnInitDevice(reshade::api::device* device) {
@@ -103,10 +137,14 @@ void OnInitDevice(reshade::api::device* device) {
     int presetInt;
     reshade::get_config_value(nullptr, "DLAA", "Preset", presetInt);
     preset = (NVSDK_NGX_DLSS_Hint_Render_Preset)presetInt;
-    if (preset != NVSDK_NGX_DLSS_Hint_Render_Preset_K &&
+    if (preset != NVSDK_NGX_DLSS_Hint_Render_Preset_F &&
+        preset != NVSDK_NGX_DLSS_Hint_Render_Preset_J &&
+        preset != NVSDK_NGX_DLSS_Hint_Render_Preset_K &&
+        preset != NVSDK_NGX_DLSS_Hint_Render_Preset_L &&
         preset != NVSDK_NGX_DLSS_Hint_Render_Preset_M) {
         preset = NVSDK_NGX_DLSS_Hint_Render_Preset_K;
     }
+    reshade::get_config_value(nullptr, "DLAA", "AutoExposure", autoExposure);
 
     NVSDK_NGX_Result result = NVSDK_NGX_D3D11_Init(1,
         L"",
@@ -254,7 +292,7 @@ bool OnDraw(reshade::api::command_list* cmd_list,
             NVSDK_NGX_Parameter_SetUI(parameters, NVSDK_NGX_Parameter_OutWidth, width);
             NVSDK_NGX_Parameter_SetUI(parameters, NVSDK_NGX_Parameter_OutHeight, height);
             NVSDK_NGX_Parameter_SetI(parameters, NVSDK_NGX_Parameter_PerfQualityValue, NVSDK_NGX_PerfQuality_Value_DLAA);
-            NVSDK_NGX_Parameter_SetI(parameters, NVSDK_NGX_Parameter_DLSS_Feature_Create_Flags, NVSDK_NGX_DLSS_Feature_Flags_IsHDR);
+            NVSDK_NGX_Parameter_SetI(parameters, NVSDK_NGX_Parameter_DLSS_Feature_Create_Flags, NVSDK_NGX_DLSS_Feature_Flags_IsHDR | (autoExposure ? NVSDK_NGX_DLSS_Feature_Flags_AutoExposure : 0));
             NVSDK_NGX_Parameter_SetI(parameters, NVSDK_NGX_Parameter_DLSS_Enable_Output_Subrects, 0);
             NVSDK_NGX_Parameter_SetUI(parameters, NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_DLAA, preset);
             NVSDK_NGX_Parameter_SetUI(parameters, NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Quality, preset);
